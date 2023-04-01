@@ -9,8 +9,8 @@ class NavBar extends StatelessWidget {
       child: ListView(
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: const Text('Oflutter.com'),
-            accountEmail: const Text('example@gmail.com'),
+            accountName: const Text('hamza_mabrouki'),
+            accountEmail: const Text('hamzamabrouki@gmail.com'),
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
                 child: Image.network(
