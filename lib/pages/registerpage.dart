@@ -34,7 +34,8 @@ class _RegisterPageState extends State<RegisterPage> {
           'messagetext': messageText, //
         })
         .then((value) => print("User Added"))
-        .catchError((error) => print("Failed to add user: $error"));
+        .catchError((error) => ScaffoldMessenger.of(context)
+            .showSnackBar((const SnackBar(content: Text("error ")))));
   }
 
   final GlobalKey<FormState> formkey = GlobalKey();
