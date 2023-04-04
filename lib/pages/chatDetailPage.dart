@@ -7,7 +7,9 @@ import 'package:scholor_chat_v2/widgets/const.dart';
 import '../models/chatMessage.dart';
 
 class ChatDetailPage extends StatefulWidget {
-  ChatDetailPage({super.key,});
+  ChatDetailPage({
+    super.key,
+  });
 
   static String id = 'ChatDetailPage';
   @override
@@ -19,64 +21,105 @@ class ChatDetailPage extends StatefulWidget {
 class _ChatDetailPage extends State<ChatDetailPage> {
   String? message;
   String? user;
+  bool messageType = true;
   TextEditingController controler = TextEditingController();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   CollectionReference messagedb =
       FirebaseFirestore.instance.collection('message');
-  Future<void> addmsg() {
-    return messagedb.add({'message': message, 'user': user});
+  Future<void> addmsg(String addmessage, bool messageTypereciversender) {
+    return messagedb
+        .add({'message': addmessage, 'messageType': messageTypereciversender});
+  }
+
+  Future<void> clearTextField(String message, bool messageType) async {
+    if (message != null && message.isNotEmpty) {
+      message = controler.text;
+      await addmsg(message, messageType);
+    }
+    controler.clear();
   }
 
   List<ChatMessage> messages = [
-    ChatMessage(messageContent: "Hello, Will", messageType: "receiver" ,user :"hamza"),
-    ChatMessage(messageContent: "How have you been?", messageType: "receiver",user :"hamza"),
-    ChatMessage(
-        messageContent: "Hey Kriss, I am doing fine dude. wbu?",
-        messageType: "sender",user :"hamza"),
-    ChatMessage(messageContent: "ehhhh, doing OK.", messageType: "receiver",user :"hamza"),
-    ChatMessage(
-        messageContent: "Is there any thing wrong?", messageType: "sender",user :"hamza"),
-    ChatMessage(messageContent: "ehhhh, doing OK.", messageType: "receiver",user :"hamza"),
-    ChatMessage(
-        messageContent: "Is there any thing wrong?", messageType: "sender",user :"hamza"),
-    ChatMessage(messageContent: "ehhhh, doing OK.", messageType: "receiver",user :"hamza"),
-    ChatMessage(
-        messageContent: "Is there any thing wrong?", messageType: "sender",user :"hamza"),
-    ChatMessage(messageContent: "ehhhh, doing OK.", messageType: "receiver",user :"hamza"),
-    ChatMessage(
-        messageContent: "Is there any thing wrong?", messageType: "sender",user :"hamza"),
-    ChatMessage(messageContent: "ehhhh, doing OK.", messageType: "receiver",user :"hamza"),
-    
-    
-    
+    // ChatMessage(
+    //   messageContent: "Hello, Will",
+    //   messageType: "receiver",
+    // ),
+    // ChatMessage(
+    //   messageContent: "How have you been?",
+    //   messageType: "receiver",
+    // ),
+    // ChatMessage(
+    //   messageContent: "Hey Kriss, I am doing fine dude. wbu?",
+    //   messageType: "sender",
+    // ),
+    // ChatMessage(
+    //   messageContent: "ehhhh, doing OK.",
+    //   messageType: "receiver",
+    // ),
+    // ChatMessage(
+    //   messageContent: "Is there any thing wrong?",
+    //   messageType: "sender",
+    // ),
+    // ChatMessage(
+    //   messageContent: "ehhhh, doing OK.",
+    //   messageType: "receiver",
+    // ),
+    // ChatMessage(
+    //   messageContent: "Is there any thing wrong?",
+    //   messageType: "sender",
+    // ),
+    // ChatMessage(
+    //   messageContent: "ehhhh, doing OK.",
+    //   messageType: "receiver",
+    // ),
+    // ChatMessage(
+    //   messageContent: "Is there any thing wrong?",
+    //   messageType: "sender",
+    // ),
+    // ChatMessage(
+    //   messageContent: "ehhhh, doing OK.",
+    //   messageType: "receiver",
+    // ),
+    // ChatMessage(
+    //   messageContent: "Is there any thing wrong?",
+    //   messageType: "sender",
+    // ),
+    // ChatMessage(
+    //   messageContent: "ehhhh, doing OK.",
+    //   messageType: "receiver",
+    // ),
   ];
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: messagedb.doc('AES8zK6ypDclEOViPCZ3').get(),
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+    // void clearTextField() {
+    //   controler.clear();
+    // }
+
+    return FutureBuilder<QuerySnapshot>(
+      future: messagedb.get(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasError) {
           print("${snapshot.hasError} Something went wrong");
           return Text("Something went wrong");
-          
         }
 
-        if (!snapshot.hasData ) {
-          print ("${snapshot.hasData}  ");
+        if (!snapshot.hasData) {
+          print("${snapshot.hasData}  ");
           return Text("Document does not exist");
         }
 
-      if (snapshot.connectionState == ConnectionState.done) {
-        print('ff');
+        if (snapshot.connectionState == ConnectionState.done) {
           // Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
-          return  
-          // Text("Full Name: ${data['message']} \t ${data['user ']}");
+          //  return Text("Full Name: ${data['message']} \t ${data['user ']}");
 
+          // for (dynamic x in ChatMessage.fromJson(snapshot.data!.docs)) {}
+          for (int x = 0; x < snapshot.data!.docs.length; x++) {
+            messages.add(ChatMessage.fromJson(snapshot.data!.docs[x]));
+          }
 
-              Scaffold(
+          return Scaffold(
             key: scaffoldKey,
             drawer: const NavBar(),
             appBar: AppBar(
@@ -168,17 +211,15 @@ class _ChatDetailPage extends State<ChatDetailPage> {
                             padding: const EdgeInsets.only(
                                 left: 14, right: 14, top: 10, bottom: 10),
                             child: Align(
-                              alignment:
-                                  (messages[index].messageType == "receiver"
-                                      ? Alignment.topLeft
-                                      : Alignment.topRight),
+                              alignment: (messages[index].messageType == false
+                                  ? Alignment.topLeft
+                                  : Alignment.topRight),
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  color:
-                                      (messages[index].messageType == "receiver"
-                                          ? Colors.grey.shade200
-                                          : Colors.blue[200]),
+                                  color: (messages[index].messageType == false
+                                      ? Colors.grey.shade200
+                                      : Colors.blue[200]),
                                 ),
                                 padding: const EdgeInsets.all(16),
                                 child: Text(
@@ -227,9 +268,6 @@ class _ChatDetailPage extends State<ChatDetailPage> {
                             controller: controler,
                             onFieldSubmitted: (msg) {
                               message = msg;
-                              controler.clear();
-                              print("check the message in the database");
-                              addmsg();
                             },
                             decoration: const InputDecoration(
                                 hintText: 'write message...',
@@ -241,7 +279,9 @@ class _ChatDetailPage extends State<ChatDetailPage> {
                           width: 15,
                         ),
                         FloatingActionButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            clearTextField(controler.text, true);
+                          },
                           backgroundColor: kPrimaryColor,
                           elevation: 0,
                           child: const Icon(
