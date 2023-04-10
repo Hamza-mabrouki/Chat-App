@@ -8,7 +8,8 @@ class ChatMessage {
   });
   factory ChatMessage.fromJson(jsonData) {
     return ChatMessage(
-        messageContent: jsonData['message'],
-        messageType: jsonData['messageType']);
+      messageContent: jsonData['message'],
+      messageType: jsonData['messageType'],
+    );
   }
 }

@@ -7,9 +7,7 @@ import 'package:scholor_chat_v2/widgets/const.dart';
 import '../models/chatMessage.dart';
 
 class ChatDetailPage extends StatefulWidget {
-  ChatDetailPage({
-    super.key,
-  });
+  ChatDetailPage();
 
   static String id = 'ChatDetailPage';
   @override
@@ -22,25 +20,34 @@ class _ChatDetailPage extends State<ChatDetailPage> {
   String? message;
   String? user;
   bool messageType = true;
-  TextEditingController controler = TextEditingController();
+  TextEditingController controller = TextEditingController();
   CollectionReference messagedb =
       FirebaseFirestore.instance.collection('message');
 
-  final Stream<QuerySnapshot> _messageStream = FirebaseFirestore.instance
-      .collection('message')
-      .snapshots(includeMetadataChanges: true);
+  final ScrollController _scrollController = new ScrollController();
 
   Future<void> addmsg(String addmessage, bool messageTypereciversender) {
-    return messagedb
-        .add({'message': addmessage, 'messageType': messageTypereciversender});
+    return messagedb.add({
+      'message': addmessage,
+      'messageType': messageTypereciversender,
+      'createdAt': DateTime.now()
+    });
   }
 
-  Future<void> clearTextField(String message, bool messageType) async {
-    if (message != null && message.isNotEmpty) {
-      message = controler.text;
-      await addmsg(message, messageType);
+  Future<void> clearTextField(String messageTextField, bool messageType) async {
+    if (messageTextField != null && messageTextField.isNotEmpty) {
+      message = controller.text;
+      await addmsg(
+        messageTextField,
+        messageType,
+      );
     }
-    controler.clear();
+    controller.clear();
+    // _scrollController.animateTo(
+    //   _scrollController.position.maxScrollExtent,
+    //   duration: Duration(milliseconds: 500),
+    //   curve: Curves.easeOut,
+    // ); // Scroll to the bottom of the list
   }
 
   List<ChatMessage> messages = [
@@ -55,24 +62,22 @@ class _ChatDetailPage extends State<ChatDetailPage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      // FutureBuilder<QuerySnapshot>(
-      // future: messagedb.get(),
-      // stream: messagedb.snapshots(),
-      stream: _messageStream,
+      stream: messagedb.orderBy('createdAt').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        print("hna fin kat dakchi li bghiti tchof $_messageStream");
+        // print("hna fin kat dakchi li bghiti tchof $_messageStream");
         if (snapshot.hasError) {
           print("${snapshot.hasError} Something went wrong");
           return Text("Something went wrong");
         }
 
-        if (!snapshot.hasData) {
-          print("${snapshot.hasData} data not exist  ");
-          return Text("Document does not exist");
-        }
-        print(snapshot.connectionState);
-        print(snapshot.data);
-        if (snapshot.connectionState == ConnectionState.active) {
+        if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+          print("${snapshot.hasData}  ");
+          //   return
+          //   Text("Document does not exist");
+          // }
+          // print(snapshot.connectionState);
+          // print(snapshot.data);
+          // if (snapshot.connectionState == ConnectionState.active) {
           messages.clear();
           for (int x = 0; x < snapshot.data!.docs.length; x++) {
             messages.add(ChatMessage.fromJson(snapshot.data!.docs[x]));
@@ -162,6 +167,7 @@ class _ChatDetailPage extends State<ChatDetailPage> {
                       ),
                       ListView.builder(
                         itemCount: messages.length,
+                        controller: _scrollController,
                         shrinkWrap: true,
                         padding: const EdgeInsets.only(top: 10, bottom: 10),
                         physics: const NeverScrollableScrollPhysics(),
@@ -224,7 +230,7 @@ class _ChatDetailPage extends State<ChatDetailPage> {
                         ),
                         Expanded(
                           child: TextFormField(
-                            controller: controler,
+                            controller: controller,
                             onFieldSubmitted: (msg) {
                               message = msg;
                             },
@@ -239,7 +245,7 @@ class _ChatDetailPage extends State<ChatDetailPage> {
                         ),
                         FloatingActionButton(
                           onPressed: () {
-                            clearTextField(controler.text, true);
+                            clearTextField(controller.text, true);
                           },
                           backgroundColor: kPrimaryColor,
                           elevation: 0,
