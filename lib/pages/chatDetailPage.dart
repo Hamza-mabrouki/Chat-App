@@ -43,11 +43,11 @@ class _ChatDetailPage extends State<ChatDetailPage> {
       );
     }
     controller.clear();
-    // _scrollController.animateTo(
-    //   _scrollController.position.maxScrollExtent,
-    //   duration: Duration(milliseconds: 500),
-    //   curve: Curves.easeOut,
-    // ); // Scroll to the bottom of the list
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+    ); // Scroll to the bottom of the list
   }
 
   List<ChatMessage> messages = [
@@ -62,7 +62,7 @@ class _ChatDetailPage extends State<ChatDetailPage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: messagedb.orderBy('createdAt').snapshots(),
+      stream: messagedb.snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         // print("hna fin kat dakchi li bghiti tchof $_messageStream");
         if (snapshot.hasError) {
@@ -263,7 +263,9 @@ class _ChatDetailPage extends State<ChatDetailPage> {
             ),
           );
         } else
-          return Text("somthing wroong");
+          print("${snapshot.hasData}  ");
+        print("${snapshot.data!.docs.isNotEmpty}  ");
+        return Text("somthing wroooong");
       },
     );
   }
